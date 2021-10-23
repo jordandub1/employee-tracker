@@ -26,33 +26,37 @@ function firstPrompt() {
       name: "task",
       message: "Would you like to do?",
       choices: [
-        "View Employees",
-        "View Employees by Department",
+        "View All Employees",
         "Add Employee",
-        "Remove Employees",
         "Update Employee Role",
+        "View All Roles",
         "Add Role",
+        "View All Departments",
+        "Add Department",
         "End"]
     })
     .then(function ({ task }) {
       switch (task) {
-        case "View Employees":
-          viewEmployee();
-          break;
-        case "View Employees by Department":
-          viewEmployeeByDepartment();
+        case "View All Employees":
+          viewEmployees();
           break;
         case "Add Employee":
           addEmployee();
           break;
-        case "Remove Employees":
-          removeEmployees();
-          break;
         case "Update Employee Role":
           updateEmployeeRole();
           break;
+        case "View All Roles":
+          viewAllRoles();
+          break;
         case "Add Role":
           addRole();
+          break;
+        case "View All Department":
+          viewAllDepartments();
+          break;
+        case "Add Department":
+          addDepartment();
           break;
         case "End":
           connection.end();
@@ -61,9 +65,9 @@ function firstPrompt() {
     });
 }
 
-//////////////////========================= 1."View Employees"/ READ all, SELECT * FROM
+//View Employees Function
 
-function viewEmployee() {
+function viewEmployees() {
   console.log("Viewing employees\n");
 
   var query =
@@ -86,12 +90,10 @@ function viewEmployee() {
   });
 }
 
-//========================================= 2."View Employees by Department" / READ by, SELECT * FROM
+//TODO: Adding Employee Function
 
-// Make a department array
-
-function viewEmployeeByDepartment() {
-  console.log("Viewing employees by department\n");
+function addEmployee() {
+  console.log("Adding Employee\n");
 
   var query =
     `SELECT d.id, d.name, r.salary AS budget
@@ -116,7 +118,7 @@ function viewEmployeeByDepartment() {
   });
 }
 
-// User choose the department list, then employees pop up
+//TODO: Update Employee Role Function
 
 function promptDepartment(departmentChoices) {
 
@@ -152,13 +154,7 @@ function promptDepartment(departmentChoices) {
     });
 }
 
-//========================================= 3."View Employees by Manager"
-
-
-
-//========================================= 4."Add Employee" / CREATE: INSERT INTO
-
-// Make a employee array
+//TODO: View All Roles Function
 
 function addEmployee() {
   console.log("Inserting an employee!")
@@ -225,9 +221,7 @@ function promptInsert(roleChoices) {
     });
 }
 
-//========================================= 5."Remove Employees" / DELETE, DELETE FROM
-
-// Make a employee array to delete
+//TODO: Add Role Function
 
 function removeEmployees() {
   console.log("Deleting an employee");
@@ -278,7 +272,7 @@ function promptDelete(deleteEmployeeChoices) {
     });
 }
 
-//========================================= 6."Update Employee Role" / UPDATE,
+//TODO: View All Departments Function
 
 function updateEmployeeRole() { 
   employeeArray();
@@ -371,7 +365,7 @@ function promptEmployeeRole(employeeChoices, roleChoices) {
 
 
 
-//////////////////========================= 7."Add Role" / CREATE: INSERT INTO
+//TODO: Add Department Function
 
 function addRole() {
 
