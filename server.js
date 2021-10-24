@@ -67,7 +67,6 @@ function firstPrompt() {
 }
 
 //View Employees Function
-
 function viewEmployees() {
   console.log("Viewing employees\n");
 
