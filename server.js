@@ -175,13 +175,12 @@ function addEmployee() {
 //Update Employee Role Function
 function updateEmployeeRole() {
   connection.query("SELECT employee.last_name, role.title FROM employee JOIN role ON employee.role_id = role.id;", function(err, res) {
-  // console.log(res)
    if (err) throw err
-   console.log(res)
   inquirer.prompt([
         {
           name: "lastName",
           type: "rawlist",
+          message: "What is the employee's last name? ",
           choices: function() {
             var lastName = [];
             for (var i = 0; i < res.length; i++) {
@@ -189,28 +188,26 @@ function updateEmployeeRole() {
             }
             return lastName;
           },
-          message: "What is the Employee's last name? ",
         },
         {
           name: "role",
           type: "rawlist",
-          message: "What is the Employees new title? ",
+          message: "What is the employee's new title? ",
           choices: selectRole()
         },
     ]).then(function(val) {
       var roleId = selectRole().indexOf(val.role) + 1
-      connection.query("UPDATE employee SET role_id = ? WHERE id = ?", 
-      {
-        last_name: val.lastName
-      }, 
-      {
-        role_id: roleId
-      }, 
+      connection.query("UPDATE employee SET role_id = ? WHERE last_name = ?", 
+      [
+        roleId,
+        val.lastName
+      ], 
       function(err){
           if (err) throw err
           console.table(val)
           firstPrompt()
       })
+      console.log(roleId);
   });
 });
 }
@@ -229,26 +226,33 @@ function viewAllRoles() {
 
 //Add Role Function
 function addRole() {
-
-  //TODO: Fix query, getting error about r.salary
   var query =
-    "SELECT d.id, d.name, r.salary AS budget FROM employee e JOIN role r ON e.role_id = r.id JOIN department d ON d.id = r.department_id GROUP BY d.id, d.name"
+    "SELECT role.title AS Role, role.salary AS Salary, department.name AS Department FROM department INNER JOIN role on department.id = role.department_id;"
 
   connection.query(query, function (err, res) {
     if (err) throw err;
 
-    const departmentChoices = res.map(({ id, name }) => ({
-      value: id, name: `${id} ${name}`
-    }));
-
     console.table(res);
-    console.log("Department array!");
 
-    promptAddRole(departmentChoices);
+    promptAddRole();
   });
 }
 
-function promptAddRole(departmentChoices) {
+var departmentArr = [];
+function selectDepartment() {
+  //Query to display role table
+  var query = "SELECT name FROM department;";
+
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    for (var i = 0; i < res.length; i++) {
+      departmentArr.push(res[i].name);
+    }
+  });
+  return departmentArr;
+}
+
+function promptAddRole() {
 
   inquirer
     .prompt([
@@ -262,11 +266,12 @@ function promptAddRole(departmentChoices) {
         name: "roleSalary",
         message: "Role Salary"
       },
+      //TODO: Find a way for selectDepartment to spit out department id ****(might have to use rawlist)
       {
         type: "list",
-        name: "departmentId",
+        name: "departmentName",
         message: "Department?",
-        choices: departmentChoices
+        choices: selectDepartment()
       },
     ])
     .then(function (answer) {
@@ -274,14 +279,13 @@ function promptAddRole(departmentChoices) {
       var query = `INSERT INTO role SET ?`
 
       connection.query(query, {
-        title: answer.title,
-        salary: answer.salary,
-        department_id: answer.departmentId
+        title: answer.roleTitle,
+        salary: answer.roleSalary,
+        //department_id: answer.departmentName,
       },
         function (err, res) {
           if (err) throw err;
 
-          console.table(res);
           console.log("Role Inserted!");
 
           firstPrompt();
