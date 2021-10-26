@@ -108,7 +108,7 @@ var managersArr = [];
 function selectManager() {
   //Query to display managers
   var query =
-    "SELECT first_name, last_name FROM employee WHERE manager_id IS NULL";
+    "SELECT * FROM employee WHERE manager_id IS NULL";
 
   connection.query(query, function (err, res) {
     if (err) throw err;
@@ -142,7 +142,7 @@ function addEmployee() {
       },
       {
         name: "manager",
-        type: "rawlist",
+        type: "list",
         message: "Whats their managers name?",
         choices: selectManager(),
       },
@@ -150,9 +150,7 @@ function addEmployee() {
     //Inserting data from answers into the database
     .then(function (val) {
       var roleId = selectRole().indexOf(val.role) + 1;
-
-      //TODO: manager not populating on list for new employee
-      var managerId = selectManager().indexOf(val.choice) + 1;
+      var managerId = selectManager().indexOf(val.manager) + 1;
 
       query = "INSERT INTO employee SET ?";
 
@@ -176,95 +174,45 @@ function addEmployee() {
 
 //Update Employee Role Function
 function updateEmployeeRole() {
-  employeeArray();
-}
-
-//Displaying employee array
-function employeeArray() {
-  var query =
-    "SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name) AS manager FROM employee e JOIN role r ON e.role_id = r.id JOIN department d ON d.id = r.department_id JOIN employee m ON m.id = e.manager_id";
-
-  connection.query(query, function (err, res) {
-    if (err) throw err;
-
-    const employeeChoices = res.map(({ id, first_name, last_name }) => ({
-      value: id,
-      name: `${first_name} ${last_name}`,
-    }));
-
-    console.table(res);
-    console.log("employeeArray to update!\n");
-
-    roleArray(employeeChoices);
-  });
-}
-
-//Displaying role array
-function roleArray(employeeChoices) {
-  var query = "SELECT r.id, r.title, r.salary FROM role r";
-  let roleChoices;
-
-  connection.query(query, function (err, res) {
-    if (err) throw err;
-
-    roleChoices = res.map(({ id, title, salary }) => ({
-      value: id,
-      title: `${title}`,
-      salary: `${salary}`,
-    }));
-
-    console.table(res);
-    console.log("roleArray to update!\n");
-
-    promptEmployeeRole(employeeChoices, roleChoices);
-  });
-}
-
-//Prompts for which employee to update and what the new role is
-function promptEmployeeRole(employeeChoices, roleChoices) {
-  inquirer
-    .prompt([
+  connection.query("SELECT employee.last_name, role.title FROM employee JOIN role ON employee.role_id = role.id;", function(err, res) {
+  // console.log(res)
+   if (err) throw err
+   console.log(res)
+  inquirer.prompt([
+        {
+          name: "lastName",
+          type: "rawlist",
+          choices: function() {
+            var lastName = [];
+            for (var i = 0; i < res.length; i++) {
+              lastName.push(res[i].last_name);
+            }
+            return lastName;
+          },
+          message: "What is the Employee's last name? ",
+        },
+        {
+          name: "role",
+          type: "rawlist",
+          message: "What is the Employees new title? ",
+          choices: selectRole()
+        },
+    ]).then(function(val) {
+      var roleId = selectRole().indexOf(val.role) + 1
+      connection.query("UPDATE employee SET role_id = ? WHERE id = ?", 
       {
-        type: "list",
-        name: "employeeId",
-        message: "Which employee do you want to update the role for?",
-        choices: employeeChoices,
-      },
+        last_name: val.lastName
+      }, 
       {
-        type: "list",
-        name: "roleId",
-        message: "What is the employee's new role?",
-        choices: roleChoices,
-      },
-    ])
-    //Updating the employee role in the table
-    .then(function (answer) {
-      var query = "UPDATE employee SET role_id = ? WHERE id = ?;";
-      connection.query(
-        query,
-        [answer.roleId, answer.employeeId],
-        function (err, res) {
-          if (err) throw err;
-        }
-      );
-
-      //Querying to display all employees with updated info
-      var query =
-        "SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, CONCAT(e.first_name, ' ' ,e.last_name) AS manager FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id left join employee e on employee.manager_id = e.id;";
-
-      connection.query(
-        query,
-        [answer.roleId, answer.employeeId],
-        function (err, res) {
-          if (err) throw err;
-
-          console.table(res);
-          console.log("Employee's role has been updated!\n");
-
-          firstPrompt();
-        }
-      );
-    });
+        role_id: roleId
+      }, 
+      function(err){
+          if (err) throw err
+          console.table(val)
+          firstPrompt()
+      })
+  });
+});
 }
 
 //View All Roles Function
