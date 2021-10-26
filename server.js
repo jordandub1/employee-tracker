@@ -266,22 +266,22 @@ function promptAddRole() {
         name: "roleSalary",
         message: "Role Salary"
       },
-      //TODO: Find a way for selectDepartment to spit out department id ****(might have to use rawlist)
       {
-        type: "list",
+        type: "rawlist",
         name: "departmentName",
         message: "Department?",
         choices: selectDepartment()
       },
     ])
     .then(function (answer) {
+      var departmentID = selectDepartment().indexOf(answer.departmentName)
 
       var query = `INSERT INTO role SET ?`
 
       connection.query(query, {
         title: answer.roleTitle,
         salary: answer.roleSalary,
-        //department_id: answer.departmentName,
+        department_id: departmentID,
       },
         function (err, res) {
           if (err) throw err;
@@ -290,9 +290,10 @@ function promptAddRole() {
 
           firstPrompt();
         });
-
     });
 }
+
+//TODO: View All Departments Function
 
 //Add Department Function
 function addDepartment() {
