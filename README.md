@@ -10,7 +10,7 @@
   * [Description](#description)
   * [Installation](#installation)
   * [Usage](#usage)
-  * [Walkthrough Video](#walkthroughvideo)
+  * [Walkthrough Video](#walkthrough-video)
   * [License](#license)
   * [Questions](#questions)
   
@@ -24,7 +24,7 @@
   ## Usage
   Prior to running the application, you will need to create the database using mysql to source the schema.sql located in the db folder.
 
-  ## Walkthrough Video
+  ## Walkthrough-Video
   ![Employee-Management-System](public/assets/walkthrough.gif)
 
   ## License
