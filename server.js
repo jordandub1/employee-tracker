@@ -69,7 +69,7 @@ function firstPrompt() {
     });
 }
 
-//View All Employees Function
+//------------------------------ View All Employees Function ------------------------------
 function viewEmployees() {
   console.log("Viewing all employees\n");
 
@@ -87,7 +87,7 @@ function viewEmployees() {
   });
 }
 
-//Add an employee section
+//------------------------------ Add an employee section ------------------------------
 //Creating role array
 var roleArr = [];
 function selectRole() {
@@ -107,8 +107,7 @@ function selectRole() {
 var managersArr = [];
 function selectManager() {
   //Query to display managers
-  var query =
-    "SELECT * FROM employee WHERE manager_id IS NULL";
+  var query = "SELECT * FROM employee WHERE manager_id IS NULL";
 
   connection.query(query, function (err, res) {
     if (err) throw err;
@@ -119,7 +118,7 @@ function selectManager() {
   return managersArr;
 }
 
-//Function to add an employee
+//------------------------------ Function to add an employee ------------------------------
 function addEmployee() {
   //Prompts to collect data for employee
   inquirer
@@ -172,49 +171,54 @@ function addEmployee() {
     });
 }
 
-//Update Employee Role Function
+//------------------------------ Update Employee Role Function ------------------------------
 function updateEmployeeRole() {
-  connection.query("SELECT employee.last_name, role.title FROM employee JOIN role ON employee.role_id = role.id;", function(err, res) {
-   if (err) throw err
-  inquirer.prompt([
-        {
-          name: "lastName",
-          type: "rawlist",
-          message: "What is the employee's last name? ",
-          choices: function() {
-            var lastName = [];
-            for (var i = 0; i < res.length; i++) {
-              lastName.push(res[i].last_name);
-            }
-            return lastName;
+  connection.query(
+    "SELECT employee.last_name, role.title FROM employee JOIN role ON employee.role_id = role.id;",
+    function (err, res) {
+      if (err) throw err;
+      inquirer
+        .prompt([
+          {
+            name: "lastName",
+            type: "rawlist",
+            message: "What is the employee's last name? ",
+            choices: function () {
+              var lastName = [];
+              for (var i = 0; i < res.length; i++) {
+                lastName.push(res[i].last_name);
+              }
+              return lastName;
+            },
           },
-        },
-        {
-          name: "role",
-          type: "rawlist",
-          message: "What is the employee's new title? ",
-          choices: selectRole()
-        },
-    ]).then(function(val) {
-      var roleId = selectRole().indexOf(val.role) + 1
-      connection.query("UPDATE employee SET role_id = ? WHERE last_name = ?", 
-      [
-        roleId,
-        val.lastName
-      ], 
-      function(err){
-          if (err) throw err
-          console.table(val)
-          firstPrompt()
-      })
-      console.log(roleId);
-  });
-});
+          {
+            name: "role",
+            type: "rawlist",
+            message: "What is the employee's new title? ",
+            choices: selectRole(),
+          },
+        ])
+        .then(function (val) {
+          var roleId = selectRole().indexOf(val.role) + 1;
+          connection.query(
+            "UPDATE employee SET role_id = ? WHERE last_name = ?",
+            [roleId, val.lastName],
+            function (err) {
+              if (err) throw err;
+              console.table(val);
+              firstPrompt();
+            }
+          );
+          console.log(roleId);
+        });
+    }
+  );
 }
 
-//View All Roles Function
+//------------------------------ View All Roles Function ------------------------------
 function viewAllRoles() {
-  query = "SELECT role.title AS job_title, role.id AS role_id, role.salary AS salary, department.name as department_name FROM department INNER JOIN role ON department.id = role.department_id";
+  query =
+    "SELECT role.title AS job_title, role.id AS role_id, role.salary AS salary, department.name as department_name FROM department INNER JOIN role ON department.id = role.department_id";
 
   connection.query(query, function (err, res) {
     if (err) throw err;
@@ -224,10 +228,10 @@ function viewAllRoles() {
   });
 }
 
-//Add Role Function
+//------------------------------ Add Role Function ------------------------------
 function addRole() {
   var query =
-    "SELECT role.title AS Role, role.salary AS Salary, department.name AS Department FROM department INNER JOIN role on department.id = role.department_id;"
+    "SELECT role.title AS Role, role.salary AS Salary, department.name AS Department FROM department INNER JOIN role on department.id = role.department_id;";
 
   connection.query(query, function (err, res) {
     if (err) throw err;
@@ -253,51 +257,63 @@ function selectDepartment() {
 }
 
 function promptAddRole() {
-
   inquirer
     .prompt([
       {
         type: "input",
         name: "roleTitle",
-        message: "Role title?"
+        message: "Role title?",
       },
       {
         type: "input",
         name: "roleSalary",
-        message: "Role Salary"
+        message: "Role Salary",
       },
       {
         type: "rawlist",
         name: "departmentName",
         message: "Department?",
-        choices: selectDepartment()
+        choices: selectDepartment(),
       },
     ])
     .then(function (answer) {
-      var departmentID = selectDepartment().indexOf(answer.departmentName)
+      var departmentID = selectDepartment().indexOf(answer.departmentName);
 
-      var query = `INSERT INTO role SET ?`
+      var query = `INSERT INTO role SET ?`;
 
-      connection.query(query, {
-        title: answer.roleTitle,
-        salary: answer.roleSalary,
-        department_id: departmentID,
-      },
+      connection.query(
+        query,
+        {
+          title: answer.roleTitle,
+          salary: answer.roleSalary,
+          department_id: departmentID,
+        },
         function (err, res) {
           if (err) throw err;
 
-          console.log("Role Inserted!");
+          console.log("Role Inserted!\n");
 
           firstPrompt();
-        });
+        }
+      );
     });
 }
 
-//TODO: View All Departments Function
+//------------------------------ View All Departments Function ------------------------------
+function viewAllDepartments() {
+  query =
+    "SELECT department.id AS ID, department.name AS Name FROM department;";
 
-//Add Department Function
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    console.table(res);
+    console.log("Displaying all departments!\n");
+    firstPrompt();
+  });
+}
+
+//------------------------------ Add Department Function ------------------------------
 function addDepartment() {
-
   //Prompting for department information to add
   inquirer
     .prompt([
